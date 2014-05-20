@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)http://threejs.org/examples/canvas_lines.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>three.js canvas - lines - random</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			a {
+				color:#0078ff;
+			}
+		</style>
+	</head>
+	<body>
+		<span id="results"></span>
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+
+
+		<script src="post-comment/three.min.js"></script>
+
+		<script>
+
+			var mouseX = 0, mouseY = 0,
+
+			windowHalfX = window.innerWidth / 2,
+			windowHalfY = window.innerHeight / 2,
+
+			SEPARATION = 200,
+			AMOUNTX = 10,
+			AMOUNTY = 10,
+
+			camera, scene, renderer;
+
+			init();
+			animate();
+
+			
+
+			function init() {
+
+				var container, separation = 100, amountX = 50, amountY = 50,
+				particles, particle;
+
+				container = document.createElement('div');
+				document.body.appendChild(container);
+
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.position.z = 100;
+
+				scene = new THREE.Scene();
+
+				renderer = new THREE.CanvasRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+				// particles
+
+				var PI2 = Math.PI * 2;
+
+
+				var geometry = new THREE.Geometry();
+
+		
+                // start ajax request
+                $.ajax({
+                    url: "post-comment/GameOfThrones74133697733_50.txt",
+                    //force to handle it as text
+                    dataType: "text",
+                    success: function(data) {
+                        
+                        //data downloaded so we call parseJSON function 
+                        //and pass downloaded data
+                        var json = $.parseJSON(data);
+
+                        //now json variable contains data in json format
+
+						var num=json.length;
+						$('#results').html('json num: ' + num);
+
+						var array_length=json[0];
+
+						var array = new Array(array_length);
+
+						for ( var i = 1; i < array_length+1; i ++ ) {
+
+							var material = new THREE.SpriteCanvasMaterial( {
+
+								color: Math.random()*0x808008+0x808008,
+								program: function ( context ) {
+
+									context.beginPath();
+									context.arc( 0, 0, 0.5, 0, PI2, true );
+									context.fill();
+
+								}
+
+							} );							
+
+							particle = new THREE.Sprite( material );
+							particle.position.x = Math.random() * 2 - 1;
+							particle.position.y = Math.random() * 2 - 1;
+							particle.position.z = Math.random() * 2 - 1;
+							particle.position.normalize();
+							particle.position.multiplyScalar( Math.random() * 10 + 450 );
+
+
+							array[i] = new Array(3);
+
+							array[i][0]=particle.position.x;
+							array[i][1]=particle.position.y;
+							array[i][2]=particle.position.z;
+
+							// particle.scale.x = particle.scale.y = 10;// sphere size
+							particle.scale.x = particle.scale.y = 1+json[i].num_of_post_likes/2000;// sphere size
+							scene.add( particle );
+
+							// var light=json[i].num_of_post_likes%100
+							// var directionalLight = new THREE.DirectionalLight( 0xffffff, json[i].num_of_post_likes );
+							// directionalLight.position.set( 0, 1, 0 );
+							// scene.add( directionalLight );
+
+							geometry.vertices.push( particle.position );
+
+						}	
+
+						for ( var i = array_length+1; i < num; i ++ ) {
+							head=json[i].head
+							tail=json[i].tail
+							width=1+json[i].num/10
+
+							var line_geometry = new THREE.Geometry();
+							line_geometry.vertices.push(new THREE.Vector3(array[head][0],array[head][1],array[head][2]));
+							line_geometry.vertices.push(new THREE.Vector3(array[tail][0],array[tail][1],array[tail][2]));
+
+							var line = new THREE.Line( line_geometry, new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 1, opacity: 0.5 } ) );
+							scene.add( line );
+						}
+
+
+                    }
+                });
+
+				// for ( var i = 0; i < num; i ++ ) {
+
+				// 	particle = new THREE.Sprite( material );
+				// 	particle.position.x = Math.random() * 2 - 1;
+				// 	particle.position.y = Math.random() * 2 - 1;
+				// 	particle.position.z = Math.random() * 2 - 1;
+				// 	particle.position.normalize();
+				// 	particle.position.multiplyScalar( Math.random() * 10 + 450 );
+				// 	particle.scale.x = particle.scale.y = 10;// sphere size
+				// 	scene.add( particle );
+
+				// 	geometry.vertices.push( particle.position );
+
+				// }
+
+				//Xiaofeng
+
+				// lines
+
+
+				//Xiaofeng load line connection from external json
+
+				// var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.5 } ) );
+				// scene.add( line );
+
+				//Xiaofeng
+
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+				document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function loadJSON(callback) {	
+	      		var xhr;
+				xhr = new XMLHttpRequest();
+				xhr.overrideMimeType("application/json");
+				xhr.open('GET', './data.json', true);
+				xhr.onreadystatechange = function(e) {
+				if (xhr.readyState === 4) {
+				  if (xhr.status === 200) {
+					callback(xobj.responseText);
+				  }
+				}
+				};
+				xhr.send(null);
+			}			
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			//
+
+			function onDocumentMouseMove(event) {
+
+				mouseX = event.clientX - windowHalfX;
+				mouseY = event.clientY - windowHalfY;
+
+			}
+
+			function onDocumentTouchStart( event ) {
+
+				if ( event.touches.length > 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+
+			}
+
+			function onDocumentTouchMove( event ) {
+
+				if ( event.touches.length == 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+
+			}
+
+			function render() {
+
+				camera.position.x += ( mouseX - camera.position.x ) * .05;
+				camera.position.y += ( - mouseY + 200 - camera.position.y ) * .05;
+				camera.lookAt( scene.position );
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+
+		<div><canvas width="1366" height="624" style="width: 1366px; height: 624px;"></canvas></div>
+	
+
+</body></html>
