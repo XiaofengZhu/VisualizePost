@@ -100,7 +100,7 @@
 				background-color: rgba(0,255,255,0.75);
 			}
 		</style>
-	<script type="text/javascript" async="" src="./sphere-post/ga.js"></script></head>
+	<script type="text/javascript" async="" src="./param-sphere-post/ga.js"></script></head>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>	
 	<body>
 		<script type="text/javascript">
@@ -115,21 +115,26 @@
 		  })();
 		</script>
 
-		<script src="./sphere-post/three.min.js"></script>
-		<script src="./sphere-post/tween.min.js"></script>
-		<script src="./sphere-post/TrackballControls.js"></script>
-		<script src="./sphere-post/CSS3DRenderer.js"></script>
+		<script src="./param-sphere-post/three.min.js"></script>
+		<script src="./param-sphere-post/tween.min.js"></script>
+		<script src="./param-sphere-post/TrackballControls.js"></script>
+		<script src="./param-sphere-post/CSS3DRenderer.js"></script>
 
 		<div id="container"><div style="overflow: hidden; -webkit-transform-style: preserve-3d; -webkit-perspective-origin-x: 50%; -webkit-perspective-origin-y: 50%; width: 1366px; height: 624px; position: absolute; top: 0px; -webkit-perspective: 406.6063163264562px;"><div style="-webkit-transform-style: preserve-3d; width: 1366px; height: 624px; -webkit-transform: translate3d(0px, 0px, 406.6063163264562px) matrix3d(1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, -1800, 1) translate3d(683px, 312px, 0px);"><div class="element" style="background-color: rgba(0, 127, 127, 0.505882); position: absolute; -webkit-transform-style: preserve-3d; -webkit-transform: translate3d(-50%, -50%, 0px) matrix3d(-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, -1000, 1);"></div></div></div></div>
 
 
-
+		<div id= "info">
+		<div>
 		<div id="menu">
 
 			<span id="results"></span>
 
 		<script>
 			var table = new Array();
+
+			var brand='bmw';
+			var common_number=50;
+			var numOfLiks=0;
 
 			var container, line_renderer, line_scene;
 			var camera, scene, renderer;
@@ -151,10 +156,19 @@
 				scene = new THREE.Scene();
 				line_scene= new THREE.Scene();
 
-				
+				var args = new Object();
+				args = GetUrlParms();
+				brand = args['brand'];
+				common_number = args['number'];
+				numOfComments = args['numOfComments'];
+
+				var filename=brand+'_'+common_number+'.txt';
+				var urlpath="param-sphere-post/"+filename;
+	
+				$('#info').html('brand: ' + brand+', common user number> '+common_number+ ', num Of Comments> '+numOfComments+' urlpath: '+urlpath);				
                 // start ajax request
                 $.ajax({
-                    url: "sphere-post/GameOfThrones74133697733_50.txt",
+                    url: urlpath,
                     //force to handle it as text
                     dataType: "text",
                     success: function(data) {
@@ -167,8 +181,9 @@
 
 						var num=json.length;
 					
-						$('#results').html('num: ' + num);
+						
 						var array_length=json[0];
+						$('#results').html('num: ' + array_length);
 
 						var array = new Array(array_length);
 
@@ -221,14 +236,14 @@
 
 							var object = objects[ i ];
 
-							var theta = i* Math.PI+Math.acos( -1 + ( 2 * i ) / l );
+							var theta = Math.acos( -1 + ( 2 * i ) / l );
 							var phi = Math.sqrt( l * Math.PI ) * theta;
 
 							var object = new THREE.Object3D();
 
 							object.position.x = 1000 * Math.cos( phi ) * Math.sin( theta );
 							object.position.y = 1000 * Math.sin( theta ) * Math.sin( phi );
-							object.position.z = 1000 * Math.cos( theta );
+							object.position.z = 1000 * Math.cos( theta )*Math.cos(i * Math.PI);
 
 							array[i] = new Array(3);
 
@@ -346,6 +361,21 @@
 				line_renderer.render( line_scene, camera );
 
 			}
+			function GetUrlParms()    
+			{
+			     var args=new Object();   
+			     var query=location.search.substring(1);         //get url string   
+			     var pairs=query.split("&");                              //split by comma   
+			     for(var i=0;i<pairs.length;i++)   
+			     {   
+			         var pos=pairs[i].indexOf('=');                      //find out name =value   
+			            if(pos==-1)   continue;                            //skip if nothing  
+			             var argname=pairs[i].substring(0,pos); //fetch name  
+			            var value=pairs[i].substring(pos+1);      //fetchvalue   
+			            args[argname]=unescape(value);         //save to args   
+			    }
+			     return args;
+			}			
 
 		</script>
 	
